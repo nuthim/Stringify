@@ -1,8 +1,10 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using Stringify.Library;
+using Stringify;
 using Stringify.Tests.Converters;
+using Newtonsoft.Json;
+using Stringify.Factory;
 
 namespace Libraries.Configuration.Tests
 {
@@ -18,8 +20,9 @@ namespace Libraries.Configuration.Tests
         public static void Initialize(TestContext context)
         {
             Converter = new StringConverter();
-            ConverterRegister.RegisterTypeConverter(typeof(bool), new LogicalBooleanConverter());
-            ConverterRegister.RegisterTypeConverter(typeof(object), new ObjectConverter());
+
+            TypeConverterFactory.RegisterTypeConverter(typeof(bool), new LogicalBooleanConverter());
+            TypeConverterFactory.RegisterTypeConverter(typeof(object), new ObjectConverter());
         }
 
         [TestMethod]
@@ -111,22 +114,21 @@ namespace Libraries.Configuration.Tests
         [TestMethod]
         public void ConvertToArray()
         {
-            string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<string[]>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<int[]>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<float[]>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<decimal[]>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<uint[]>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<short[]>(array).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<string[]>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';'}).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<int[]>("1, 2, 3, 4, 5").Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<float[]>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<decimal[]>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<uint[]>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<short[]>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count() == 5);
         }
 
         [TestMethod]
         public void ConvertFromArray()
         {
             Assert.IsTrue(Converter.ConvertFrom<string[]>(new[] {"1", null, string.Empty, "!@#$%^&*()", "happy mother's day!" }) == "1,,,!@#$%^&*(),happy mother's day!");
-            Assert.IsTrue(Converter.ConvertFrom<int[]>(new[] { 1, 2, 3, 4, 5 }) == "1,2,3,4,5");
+            Assert.IsTrue(Converter.ConvertFrom<int[]>(new[] { 1, 2, 3, 4, 5 }, '_') == "1_2_3_4_5");
             Assert.IsTrue(Converter.ConvertFrom<decimal[]>(new decimal[] { 0, 2.5m, 3, 445.45m, 5 }) == "0,2.5,3,445.45,5");
-            Assert.IsTrue(Converter.ConvertFrom<ushort[]>(new ushort[] { 1, 2, 3, 4, 5 }) == "1,2,3,4,5");
+            Assert.IsTrue(Converter.ConvertFrom<ushort[]>(new ushort[] { 1, 2, 3, 4, 5 }, '\t') == "1\t2\t3\t4\t5");
         }
 
         [TestMethod]
@@ -175,17 +177,25 @@ namespace Libraries.Configuration.Tests
         }
 
         [TestMethod]
-        public void ConvertToStudent()
+        public void ConvertComplexType()
         {
-            var student = "{\"Id\":101, \"Name\":\"Mithun Basak\"}";
-            var x = Converter.ConvertTo<Student>(student);
+            var employee = new Employee { Id = 1, Name = "Mithun" };
+            Assert.IsTrue(Converter.ConvertFrom<Employee>(employee) == employee.ToString());
+        }
+
+    }
+
+    internal class Employee
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public override string ToString()
+        {
+            return $"Id: {Id}, Name: {Name}";
         }
     }
 
-    internal class Student
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        //public string[] Courses { get; set; }
-    }
+   
 }

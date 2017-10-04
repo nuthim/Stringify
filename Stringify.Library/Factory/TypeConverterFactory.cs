@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Collections.Concurrent;
 
-namespace Stringify.Library
+namespace Stringify.Factory
 {
-    public static class ConverterRegister
+    public static class TypeConverterFactory
     {
         private static readonly ConcurrentDictionary<Type, TypeConverter> _converters = new ConcurrentDictionary<Type, TypeConverter>();
 
@@ -26,6 +26,4 @@ namespace Stringify.Library
             return converter;
         }
     }
-
-
 }

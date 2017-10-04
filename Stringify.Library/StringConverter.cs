@@ -4,65 +4,87 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using System.Globalization;
+using Stringify.Factory;
 
-
-namespace Stringify.Library
+namespace Stringify
 {
     public class StringConverter
     {
+        /// <summary>
+        /// Converts a string to the desired type using the default options <see cref="Stringify.ConverterOptions.Default"/>
+        /// </summary>
+        /// <typeparam name="T">Desired output type</typeparam>
+        /// <param name="value">String value to be converted</param>
+        /// <returns>Instance of the desired type</returns>
         public T ConvertTo<T>(string value)
+        {
+            return ConvertTo<T>(value, ConverterOptions.Default);
+        }
+
+        /// <summary>
+        /// Converts a string to the desired type using the specified options
+        /// </summary>
+        /// <typeparam name="T">Desired output type</typeparam>
+        /// <param name="value">String value to be converted</param>
+        /// <param name="options">Converter options to customise</param>
+        /// <returns>Instance of the desired type</returns>
+        public T ConvertTo<T>(string value, ConverterOptions options)
         {
             var type = typeof(T);
             if (value == null && type.IsClass)
                 return default(T);
 
-            if (!IsEnumerableType(type))
-                return Convert<T>(value);
+            if (options == null)
+                options = ConverterOptions.Default;
 
-            var elementType = type.IsGenericType ? type.GetGenericArguments() : new[] { type.GetElementType() };
-            MethodInfo method = typeof(StringConverter).GetMethod("GetArray", BindingFlags.NonPublic | BindingFlags.Instance);
-            MethodInfo generic = method.MakeGenericMethod(elementType);
+            if (!EnumerableHelper.IsEnumerableType(type))
+                return Convert<T>(value, options);
 
-            var result = generic.Invoke(this, new object[] { value, ',' });
+            var enumerable = InvokeGetArray(type, value, options);
             if (type.IsArray || type.IsInterface)
-                return (T)result;
+                return (T)enumerable;
 
-            return (T)Activator.CreateInstance(type, result);
+            return (T)Activator.CreateInstance(type, enumerable);
         }
 
-        public string ConvertFrom<T>(T value)
+        /// <summary>
+        /// Convert a given type to string
+        /// </summary>
+        /// <typeparam name="T">Type of input</typeparam>
+        /// <param name="value">Instance of input type</param>
+        /// <param name="separator">Defaults to ',' Only needed when converting from enumerable types to a delimited string</param>
+        /// <returns>String</returns>
+        public string ConvertFrom<T>(T value, char separator = ',')
         {
             if (value == null)
                 return null;
 
             var type = value.GetType();
-            if (!IsEnumerableType(type))
+            if (!EnumerableHelper.IsEnumerableType(type))
                 return Convert<T>(value);
 
-            var genericArguments = type.IsGenericType ? type.GetGenericArguments() : new[] { type.GetElementType() };
-            var methodInfo = typeof(StringConverter).GetMethod("AsString", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericArguments);
-            return methodInfo.Invoke(this, new object[] { value, "," }) as string;
+            return InvokeAsString(type, value, separator) as string;
         }
 
 
         #region Helper Methods
 
-        private T Convert<T>(string value)
+        private T Convert<T>(string value, ConverterOptions options)
         {
             var type = typeof(T);
-            var converter = ConverterRegister.GetTypeConverter(type) ?? TypeDescriptor.GetConverter(type);
-
-            if (typeof(TypeConverter) == converter.GetType())
-            {
-                T result;
-                var deserializer = new JsonDeserializer();
-                if (deserializer.Deserialize<T>(value, out result))
-                    return result;
-            }
-
+            
             try
             {
-                return (T)converter.ConvertFrom(value);
+                if (options.StringFormat != Format.None)
+                {
+                    var deserializer = DeserializerFactory.GetDeserializer(options);
+                    if (deserializer != null)
+                        return (T)deserializer.Deserialize(value, typeof(T));
+                }
+
+                var converter = TypeConverterFactory.GetTypeConverter(type) ?? TypeDescriptor.GetConverter(type);
+                return (T)converter.ConvertFrom(null, CultureInfo.CurrentUICulture, value);
             }
             catch (Exception ex)
             {
@@ -73,7 +95,7 @@ namespace Stringify.Library
         private string Convert<T>(T value)
         {
             var type = typeof(T);
-            var converter = ConverterRegister.GetTypeConverter(type) ?? TypeDescriptor.GetConverter(type);
+            var converter = TypeConverterFactory.GetTypeConverter(type) ?? TypeDescriptor.GetConverter(type);
 
             try
             {
@@ -85,19 +107,36 @@ namespace Stringify.Library
             }
         }
 
-        private T[] GetArray<T>(string delimitedString, char delimiter = ',')
+        private object InvokeGetArray(Type enumerableType, string value, ConverterOptions options)
         {
-            return delimitedString.Split(delimiter).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => Convert<T>(x)).ToArray();
+            var elementType = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() };
+            MethodInfo method = typeof(StringConverter).GetMethod("GetArray", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo generic = method.MakeGenericMethod(elementType);
+            return generic.Invoke(this, new object[] { value, options });
         }
 
-        private string AsString<T>(IEnumerable<T> enumerable, string separator)
+        private T[] GetArray<T>(string delimitedString, ConverterOptions options)
         {
-            return string.Join(separator, enumerable.Select(x => Convert(x)));
+            if (options.StringFormat != Format.None)
+            {
+                var deserializer = DeserializerFactory.GetDeserializer(options);
+                if (deserializer != null)
+                    return (T[])deserializer.Deserialize(delimitedString, typeof(T[]));
+            }
+
+            return delimitedString.Split(options.Delimiter).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => Convert<T>(x, options)).ToArray();
         }
 
-        private static bool IsEnumerableType(Type type)
+        private object InvokeAsString(Type enumerableType, object value, char separator)
         {
-            return type != null && type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type);
+            var genericArguments = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() };
+            var methodInfo = typeof(StringConverter).GetMethod("AsString", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericArguments);
+            return methodInfo.Invoke(this, new object[] { value, separator });
+        }
+
+        private string AsString<T>(IEnumerable<T> enumerable, char separator)
+        {
+            return string.Join(separator.ToString(), enumerable.Select(x => Convert(x)));
         }
 
         #endregion
