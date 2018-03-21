@@ -1,32 +1,24 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
+using Stringify.Converters;
 
 
 namespace Stringify.Tests.Converters
 {
-    public class LogicalBooleanConverter : BooleanConverter
+    public class FrenchBooleanConverter : LogicalBooleanConverter
     {
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            if (value != null)
-            {
-                string strVal = value.ToString().ToLower();
+            if (value == null)
+                return base.ConvertFrom(context, culture, null);
 
-                switch (strVal)
-                {
-                    case "1":
-                    case "t":
-                    case "y":
-                    case "yes":
-                        return true;
+            var strVal = value.ToString().ToLower();
 
-                    case "0":
-                    case "f":
-                    case "n":
-                    case "no":
-                        return false;
-                }
-            }
+            if (strVal == "vrai")
+                return true;
+
+            if (strVal == "faux")
+                return false;
 
             return base.ConvertFrom(context, culture, value);
         }

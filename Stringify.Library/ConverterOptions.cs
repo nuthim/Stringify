@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Xml;
+﻿using System.Globalization;
+
 
 namespace Stringify
 {
@@ -8,20 +8,17 @@ namespace Stringify
         public static readonly ConverterOptions _defaultOptions;
         private const char DefaultDelimiter = ',';
         private char? _customDelimiter;
-
+        private CultureInfo _cultureInfo;
+        private NumberStyles? _styles;
         static ConverterOptions()
         {
             _defaultOptions = new ConverterOptions
             {
-                Delimiter = DefaultDelimiter,
-                StringFormat = Format.None
+                Delimiter = DefaultDelimiter
             };
         }
 
-        public static ConverterOptions Default
-        {
-            get { return _defaultOptions; }
-        }
+        public static ConverterOptions Default => _defaultOptions;
 
         public char Delimiter
         {
@@ -29,20 +26,16 @@ namespace Stringify
             set { _customDelimiter = value; }
         }
 
-        public Format StringFormat
+        public CultureInfo CultureInfo
         {
-            get; set;
+            get { return _cultureInfo ?? CultureInfo.CurrentCulture; }
+            set { _cultureInfo = value; }
         }
 
-        public JsonSerializerSettings JsonSettings { get; set; }
-
-        public XmlReaderSettings XmlSettings { get; set; }
-    }
-
-    public enum Format
-    {
-        None = 0,
-        Json = 1,
-        Xml
+        public NumberStyles NumberStyles
+        {
+            get { return _styles ?? NumberStyles.Any; }
+            set { _styles = value; }
+        }
     }
 }

@@ -1,12 +1,12 @@
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using Stringify;
-using Stringify.Tests.Converters;
-using Newtonsoft.Json;
 using Stringify.Factory;
+using Stringify.Tests.Converters;
+// ReSharper disable CompareOfFloatsByEqualityOperator
+#pragma warning disable 252,253
 
-namespace Libraries.Configuration.Tests
+namespace Stringify.Tests
 {
     [TestClass]
     public class ConversionTests
@@ -20,15 +20,13 @@ namespace Libraries.Configuration.Tests
         public static void Initialize(TestContext context)
         {
             Converter = new StringConverter();
-
-            TypeConverterFactory.RegisterTypeConverter(typeof(bool), new LogicalBooleanConverter());
-            TypeConverterFactory.RegisterTypeConverter(typeof(object), new ObjectConverter());
+            TypeConverterFactory.RegisterTypeConverter(typeof(bool), new FrenchBooleanConverter());
         }
 
         [TestMethod]
         public void ConvertToPrimitive()
         {
-            Assert.IsTrue(Converter.ConvertTo<int>("5") == 5);
+            Assert.IsTrue(Converter.ConvertTo<int>("1,000") == 1000);
             Assert.IsTrue(Converter.ConvertTo<uint>("5") == 5u);
             Assert.IsTrue(Converter.ConvertTo<long>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<ulong>("5") == 5);
@@ -42,6 +40,8 @@ namespace Libraries.Configuration.Tests
             Assert.IsTrue(Converter.ConvertTo<ushort>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<byte>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<sbyte>("5") == 5);
+            Assert.IsTrue(Converter.ConvertTo<object>("5") == "5");
+            Assert.IsTrue(Converter.ConvertTo<object>(null) == null);
         }
 
         [TestMethod]
@@ -58,16 +58,16 @@ namespace Libraries.Configuration.Tests
         [TestMethod]
         public void ConvertFromPrimitive()
         {
-            Assert.IsTrue(Converter.ConvertFrom<int>(5) == "5");
-            Assert.IsTrue(Converter.ConvertFrom<uint>(5u) == "5");
+            Assert.IsTrue(Converter.ConvertFrom(5) == "5"); //int to string
+            Assert.IsTrue(Converter.ConvertFrom(5u) == "5");
             Assert.IsTrue(Converter.ConvertFrom<long>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<ulong>(5) == "5");
-            Assert.IsTrue(Converter.ConvertFrom<string>("5") == "5");
+            Assert.IsTrue(Converter.ConvertFrom("5") == "5");
             Assert.IsTrue(Converter.ConvertFrom<string>(null) == null);
-            Assert.IsTrue(Converter.ConvertFrom<string>(string.Empty) == string.Empty);
-            Assert.IsTrue(Converter.ConvertFrom<float>(5f) == "5");
-            Assert.IsTrue(Converter.ConvertFrom<double>(5.0d) == "5");
-            Assert.IsTrue(Converter.ConvertFrom<decimal>(0.55m) == "0.55");
+            Assert.IsTrue(Converter.ConvertFrom(string.Empty) == string.Empty);
+            Assert.IsTrue(Converter.ConvertFrom(5f) == "5");
+            Assert.IsTrue(Converter.ConvertFrom(5.0d) == "5");
+            Assert.IsTrue(Converter.ConvertFrom(0.55m) == "0.55");
             Assert.IsTrue(Converter.ConvertFrom<short>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<ushort>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<byte>(5) == "5");
@@ -77,30 +77,32 @@ namespace Libraries.Configuration.Tests
         [TestMethod]
         public void ConvertToBoolean()
         {
-            Assert.IsTrue(Converter.ConvertTo<bool>("true") == true);
-            Assert.IsTrue(Converter.ConvertTo<bool>("FALSE") == false);
-            Assert.IsTrue(Converter.ConvertTo<bool>("1") == true);
-            Assert.IsTrue(Converter.ConvertTo<bool>("0") == false);
-            Assert.IsTrue(Converter.ConvertTo<bool>("T") == true);
-            Assert.IsTrue(Converter.ConvertTo<bool>("f") == false);
-            Assert.IsTrue(Converter.ConvertTo<bool>("Y") == true);
-            Assert.IsTrue(Converter.ConvertTo<bool>("n") == false);
-            Assert.IsTrue(Converter.ConvertTo<bool>("Yes") == true);
-            Assert.IsTrue(Converter.ConvertTo<bool>("NO") == false);
+            Assert.IsTrue(Converter.ConvertTo<bool>("true"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("FALSE"));
+            Assert.IsTrue(Converter.ConvertTo<bool>("1"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("0"));
+            Assert.IsTrue(Converter.ConvertTo<bool>("T"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("f"));
+            Assert.IsTrue(Converter.ConvertTo<bool>("Y"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("n"));
+            Assert.IsTrue(Converter.ConvertTo<bool>("Yes"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("NO"));
+            Assert.IsTrue(Converter.ConvertTo<bool>("VrAi"));
+            Assert.IsFalse(Converter.ConvertTo<bool>("FauX"));
         }
 
         [TestMethod]
         public void ConvertFromBoolean()
         {
-            Assert.IsTrue(Converter.ConvertFrom<bool>(true) == bool.TrueString);
-            Assert.IsTrue(Converter.ConvertFrom<bool>(false) == bool.FalseString);
+            Assert.IsTrue(Converter.ConvertFrom(true) == bool.TrueString);
+            Assert.IsTrue(Converter.ConvertFrom(false) == bool.FalseString);
         }
 
         [TestMethod]
         public void ConvertToIEnumerableBoolean()
         {
             //Alternating true and false values
-            var array = Converter.ConvertTo<IEnumerable<bool>>("true,false,TRUE,FALSE,T,F,t,f,1,0,yes,no,YES,NO,Y,N");
+            var array = Converter.ConvertTo<IEnumerable<bool>>("true,false,TRUE,FALSE,T,F,t,f,1,0,yes,no,YES,NO,Y,N,VRAI,faux").ToArray();
 
             //Assert all even indexed elements are true
             var trueArray = array.Where((x, i) => i % 2 == 0);
@@ -108,33 +110,33 @@ namespace Libraries.Configuration.Tests
 
             //Assert all odd indexed elements are false
             var falseArray = array.Where((x, i) => i % 2 != 0);
-            Assert.IsFalse(falseArray.Any(x => x == true));
+            Assert.IsFalse(falseArray.Any(x => x));
         }
 
         [TestMethod]
         public void ConvertToArray()
         {
-            Assert.IsTrue(Converter.ConvertTo<string[]>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';'}).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<int[]>("1, 2, 3, 4, 5").Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<float[]>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<decimal[]>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<uint[]>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<short[]>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<string[]>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';'}).Length == 5);
+            Assert.IsTrue(Converter.ConvertTo<int[]>("1, 2, 3, 4, 5").Length == 5);
+            Assert.IsTrue(Converter.ConvertTo<float[]>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Length == 5);
+            Assert.IsTrue(Converter.ConvertTo<decimal[]>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Length == 5);
+            Assert.IsTrue(Converter.ConvertTo<uint[]>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Length == 5);
+            Assert.IsTrue(Converter.ConvertTo<short[]>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Length == 5);
         }
 
         [TestMethod]
         public void ConvertFromArray()
         {
-            Assert.IsTrue(Converter.ConvertFrom<string[]>(new[] {"1", null, string.Empty, "!@#$%^&*()", "happy mother's day!" }) == "1,,,!@#$%^&*(),happy mother's day!");
-            Assert.IsTrue(Converter.ConvertFrom<int[]>(new[] { 1, 2, 3, 4, 5 }, '_') == "1_2_3_4_5");
-            Assert.IsTrue(Converter.ConvertFrom<decimal[]>(new decimal[] { 0, 2.5m, 3, 445.45m, 5 }) == "0,2.5,3,445.45,5");
-            Assert.IsTrue(Converter.ConvertFrom<ushort[]>(new ushort[] { 1, 2, 3, 4, 5 }, '\t') == "1\t2\t3\t4\t5");
+            Assert.IsTrue(Converter.ConvertFrom(new[] {"1", null, string.Empty, "!@#$%^&*()", "happy mother's day!" }) == "1,,,!@#$%^&*(),happy mother's day!");
+            Assert.IsTrue(Converter.ConvertFrom(new[] { 1, 2, 3, 4, 5 }, new ConverterOptions { Delimiter = '_' }) == "1_2_3_4_5");
+            Assert.IsTrue(Converter.ConvertFrom(new[] { 0, 2.5m, 3, 445.45m, 5 }) == "0,2.5,3,445.45,5");
+            Assert.IsTrue(Converter.ConvertFrom(new ushort[] { 1, 2, 3, 4, 5 }, new ConverterOptions { Delimiter = '\t' }) == "1\t2\t3\t4\t5");
         }
 
         [TestMethod]
         public void ConvertToEnumerable()
         {
-            string array = "1, 2, 3, 4, 5";
+            const string array = "1, 2, 3, 4, 5";
             Assert.IsTrue(Converter.ConvertTo<IEnumerable<string>>(array).Count() == 5);
             Assert.IsTrue(Converter.ConvertTo<IEnumerable<int>>(array).Count() == 5);
             Assert.IsTrue(Converter.ConvertTo<IEnumerable<float>>(array).Count() == 5);
@@ -156,31 +158,31 @@ namespace Libraries.Configuration.Tests
         public void ConvertToIList()
         {
             string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<IList<string>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<int>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<float>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<decimal>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<uint>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<short>>(array).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<string>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<int>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<float>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<decimal>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<uint>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<short>>(array).Count == 5);
         }
 
         [TestMethod]
         public void ConvertToList()
         {
             string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<List<string>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<int>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<float>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<decimal>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<uint>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<short>>(array).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<string>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<int>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<float>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<decimal>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<uint>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<short>>(array).Count == 5);
         }
 
         [TestMethod]
         public void ConvertComplexType()
         {
             var employee = new Employee { Id = 1, Name = "Mithun" };
-            Assert.IsTrue(Converter.ConvertFrom<Employee>(employee) == employee.ToString());
+            Assert.IsTrue(Converter.ConvertFrom(employee) == employee.ToString());
         }
 
     }
