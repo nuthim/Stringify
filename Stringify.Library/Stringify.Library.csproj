@@ -30,14 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json.Schema, Version=3.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.Schema.3.0.3\lib\net45\Newtonsoft.Json.Schema.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,17 +42,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConverterOptions.cs" />
+    <Compile Include="Converters\BaseNumberConverter.cs" />
+    <Compile Include="Converters\ByteConverter.cs" />
+    <Compile Include="Converters\DecimalConverter.cs" />
+    <Compile Include="Converters\DoubleConverter.cs" />
+    <Compile Include="Converters\Int16Converter.cs" />
+    <Compile Include="Converters\Int32Converter.cs" />
+    <Compile Include="Converters\Int64Converter.cs" />
+    <Compile Include="Converters\LogicalBooleanConverter.cs" />
+    <Compile Include="Converters\ObjectConverter.cs" />
+    <Compile Include="Converters\SByteConverter.cs" />
+    <Compile Include="Converters\SingleConverter.cs" />
+    <Compile Include="Converters\UInt16Converter.cs" />
+    <Compile Include="Converters\UInt32Converter.cs" />
+    <Compile Include="Converters\UInt64Converter.cs" />
     <Compile Include="EnumerableHelper.cs" />
-    <Compile Include="Factory\DeserializerFactory.cs" />
-    <Compile Include="Deserializers\IDeserializer.cs" />
-    <Compile Include="Deserializers\XmlDeserializer.cs" />
-    <Compile Include="Deserializers\JsonDeserializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Factory\TypeConverterFactory.cs" />
     <Compile Include="StringConverter.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
