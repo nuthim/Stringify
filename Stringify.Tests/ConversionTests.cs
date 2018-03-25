@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Stringify.Factory;
 using Stringify.Tests.Converters;
@@ -20,13 +22,13 @@ namespace Stringify.Tests
         public static void Initialize(TestContext context)
         {
             Converter = new StringConverter();
-            TypeConverterFactory.RegisterTypeConverter(typeof(bool), new FrenchBooleanConverter());
+            TypeConverterFactory.RegisterTypeConverter(typeof(bool), new CustomBooleanConverter());
         }
 
         [TestMethod]
         public void ConvertToPrimitive()
         {
-            Assert.IsTrue(Converter.ConvertTo<int>("1,000") == 1000);
+            Assert.IsTrue(Converter.ConvertTo<int>("1000") == 1000);
             Assert.IsTrue(Converter.ConvertTo<uint>("5") == 5u);
             Assert.IsTrue(Converter.ConvertTo<long>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<ulong>("5") == 5);
@@ -40,8 +42,36 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<ushort>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<byte>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<sbyte>("5") == 5);
-            Assert.IsTrue(Converter.ConvertTo<object>("5") == "5");
-            Assert.IsTrue(Converter.ConvertTo<object>(null) == null);
+        }
+
+        [TestMethod]
+        public void ConvertToPrimitiveWithStyles()
+        {
+            Assert.IsTrue(Converter.ConvertTo<int>("1,000") == 1000); //Group separator
+            Assert.IsTrue(Converter.ConvertTo<int>("-1,000") == -1000); //Sign
+            Assert.IsTrue(Converter.ConvertTo<int>("(1,000)") == -1000); //Parantheses indicates negative
+            Assert.IsTrue(Converter.ConvertTo<int>("$1,000") == 1000); //Currency
+            Assert.IsTrue(Converter.ConvertTo<int>("    1,000   ") == 1000); //White spaces
+            Assert.IsTrue(Converter.ConvertTo<int>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber}) == 202); //White spaces
+            Assert.IsTrue(Converter.ConvertTo<int>("    1,005E2   ") == 100500); //Exponent
+            Assert.IsTrue(Converter.ConvertTo<int>("    1,005E02   ") == 100500); //Exponent
+            Assert.IsTrue(Converter.ConvertTo<int>("    1,000E-2   ") == 10); //Exponent
+            Assert.IsTrue(Converter.ConvertTo<int>("    1,000E-02   ") == 10); //Exponent
+
+            Assert.IsTrue(Converter.ConvertTo<decimal>("1,000") == 1000m); //Group separator
+            Assert.IsTrue(Converter.ConvertTo<decimal>("-1,000") == -1000m); //Sign
+            Assert.IsTrue(Converter.ConvertTo<decimal>("(1,000)") == -1000m); //Parantheses indicates negative
+            Assert.IsTrue(Converter.ConvertTo<decimal>("$1,000") == 1000m); //Currency
+            Assert.IsTrue(Converter.ConvertTo<decimal>("    1,000   ") == 1000m); //White spaces
+            Assert.IsTrue(Converter.ConvertTo<decimal>("    1,005E-2   ") == 10.05m); //Exponent
+        }
+
+        [TestMethod]
+        public void ConvertToPrimitiveUnsupportedStyles()
+        {
+            Assert.IsTrue(Converter.ConvertTo<decimal>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber }) == 202m); //Hex not supported on decimal
+            Assert.IsTrue(Converter.ConvertTo<float>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber }) == 202f); //Hex not supported on float
+            Assert.IsTrue(Converter.ConvertTo<double>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber }) == 202d); //Hex not supported on double
         }
 
         [TestMethod]
@@ -50,10 +80,11 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<int?>("5") == 5);
             Assert.IsTrue(Converter.ConvertTo<int?>(null) == null);
             Assert.IsTrue(Converter.ConvertTo<bool?>(null) == null);
-
             Assert.IsTrue(Converter.ConvertFrom<int?>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<int?>(null) == null);
         }
+
+
 
         [TestMethod]
         public void ConvertFromPrimitive()
@@ -72,6 +103,16 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<ushort>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<byte>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<sbyte>(5) == "5");
+        }
+
+        [TestMethod]
+        public void ConvertObjects()
+        {
+            Assert.IsTrue(Converter.ConvertTo<object>("5") == "5");
+            Assert.IsTrue(Converter.ConvertTo<object>(null) == null);
+
+            Assert.IsTrue(Converter.ConvertFrom<object>("5") == "5");
+            Assert.IsTrue(Converter.ConvertFrom<object>(null) == null);
         }
 
         [TestMethod]
@@ -179,7 +220,7 @@ namespace Stringify.Tests
         }
 
         [TestMethod]
-        public void ConvertComplexType()
+        public void ConvertFromComplexType()
         {
             var employee = new Employee { Id = 1, Name = "Mithun" };
             Assert.IsTrue(Converter.ConvertFrom(employee) == employee.ToString());

@@ -15,6 +15,10 @@ namespace Stringify.Converters
                 return base.ConvertFrom(context, culture, value);
 
             var formatInfo = culture.GetFormat(typeof(NumberFormatInfo));
+            s = s.Trim();
+            if ((Options.NumberStyles & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
+                s = s.Replace("0x", string.Empty).Replace("&h", string.Empty).Replace("0X", string.Empty).Replace("&H", string.Empty);
+
             return FromString(s.Trim(), (NumberFormatInfo)formatInfo);
         }
 

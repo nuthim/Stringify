@@ -5,7 +5,7 @@ using Stringify.Converters;
 
 namespace Stringify.Tests.Converters
 {
-    public class FrenchBooleanConverter : LogicalBooleanConverter
+    public class CustomBooleanConverter : LogicalBooleanConverter
     {
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {

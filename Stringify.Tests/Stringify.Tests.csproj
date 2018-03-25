@@ -51,7 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ConversionTests.cs" />
-    <Compile Include="Converters\LogicalBooleanConverter.cs" />
+    <Compile Include="Converters\CustomBooleanConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
