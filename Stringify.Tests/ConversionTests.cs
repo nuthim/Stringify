@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Stringify.Factory;
 using Stringify.Tests.Converters;
@@ -177,13 +178,12 @@ namespace Stringify.Tests
         [TestMethod]
         public void ConvertToEnumerable()
         {
-            const string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<string>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<int>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<float>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<decimal>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<uint>>(array).Count() == 5);
-            Assert.IsTrue(Converter.ConvertTo<IEnumerable<short>>(array).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<int>>("1, 2, 3, 4, 5").Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<float>>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count() == 5);
+            Assert.IsTrue(Converter.ConvertTo<IEnumerable<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count() == 5);
         }
 
         [TestMethod]
@@ -198,25 +198,54 @@ namespace Stringify.Tests
         [TestMethod]
         public void ConvertToIList()
         {
-            string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<IList<string>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<int>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<float>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<decimal>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<uint>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<IList<short>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<int>>("1, 2, 3, 4, 5").Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<float>>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<IList<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
+
+            //Convert to non-generic counterpart
+            Assert.IsTrue(Converter.ConvertTo<IList>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
         }
 
         [TestMethod]
         public void ConvertToList()
         {
-            string array = "1, 2, 3, 4, 5";
-            Assert.IsTrue(Converter.ConvertTo<List<string>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<int>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<float>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<decimal>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<uint>>(array).Count == 5);
-            Assert.IsTrue(Converter.ConvertTo<List<short>>(array).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<int>>("1, 2, 3, 4, 5").Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<float>>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<List<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
+
+            //Convert to non-generic counterpart
+            Assert.IsTrue(Converter.ConvertTo<ArrayList>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+        }
+
+        [TestMethod]
+        public void ConvertToICollection()
+        {
+            Assert.IsTrue(Converter.ConvertTo<ICollection<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<ICollection<int>>("1, 2, 3, 4, 5").Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<ICollection<float>>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<ICollection<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<ICollection<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<ICollection<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
+
+            //Convert to non-generic counterpart
+            Assert.IsTrue(Converter.ConvertTo<ICollection>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+        }
+
+        [TestMethod]
+        public void ConvertToCollection()
+        {
+            Assert.IsTrue(Converter.ConvertTo<Collection<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<Collection<int>>("1, 2, 3, 4, 5").Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<Collection<float>>("1 2 3 4 5", new ConverterOptions { Delimiter = ' ' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<Collection<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<Collection<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count == 5);
+            Assert.IsTrue(Converter.ConvertTo<Collection<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
         }
 
         [TestMethod]

@@ -114,7 +114,7 @@ namespace Stringify
 
         private object InvokeGetArray(Type enumerableType, string value, ConverterOptions options)
         {
-            var elementType = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() };
+            var elementType = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() ?? typeof(object) };
             var method = typeof(StringConverter).GetMethod("GetArray", BindingFlags.NonPublic | BindingFlags.Instance);
             var generic = method.MakeGenericMethod(elementType);
             return generic.Invoke(this, new object[] { value, options });
