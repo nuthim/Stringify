@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Stringify</RootNamespace>
     <AssemblyName>Stringify</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,9 +45,11 @@
     <Compile Include="ConverterOptions.cs" />
     <Compile Include="Converters\BaseNumberConverter.cs" />
     <Compile Include="Converters\ByteConverter.cs" />
+    <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\DecimalConverter.cs" />
     <Compile Include="Converters\DecimalNumberConverter.cs" />
     <Compile Include="Converters\DoubleConverter.cs" />
+    <Compile Include="Converters\ICustomConverter.cs" />
     <Compile Include="Converters\Int16Converter.cs" />
     <Compile Include="Converters\Int32Converter.cs" />
     <Compile Include="Converters\Int64Converter.cs" />

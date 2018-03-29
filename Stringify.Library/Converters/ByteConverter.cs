@@ -1,12 +1,17 @@
-﻿using System.Globalization;
+﻿
 
 namespace Stringify.Converters
 {
     public class ByteConverter : BaseNumberConverter
     {
-        internal override object FromString(string value, NumberFormatInfo formatInfo)
+        internal override object FromString(string value)
         {
-            return byte.Parse(value, Options.NumberStyles, formatInfo);
+            return byte.Parse(value, Options.NumberStyles, Options.CultureInfo.NumberFormat);
+        }
+
+        internal override string ToString(object value, string format)
+        {
+            return ((byte) value).ToString(format, Options.CultureInfo.NumberFormat);
         }
     }
 }

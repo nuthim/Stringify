@@ -3,8 +3,10 @@ using System.Globalization;
 
 namespace Stringify.Converters
 {
-    public class LogicalBooleanConverter : BooleanConverter
+    public class LogicalBooleanConverter : BooleanConverter, ICustomConverter
     {
+        public ConverterOptions Options { get; set; }
+
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value == null)

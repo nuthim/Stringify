@@ -1,10 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 
 
 namespace Stringify.Converters
 {
-    public abstract class BaseNumberConverter : TypeConverter
+    public abstract class BaseNumberConverter : TypeConverter, ICustomConverter
     {
         public ConverterOptions Options { get; set; }
 
@@ -12,16 +13,25 @@ namespace Stringify.Converters
         {
             var s = value as string;
             if (s == null)
-                return base.ConvertFrom(context, culture, value);
+                return base.ConvertFrom(context, Options.CultureInfo, value);
 
-            var formatInfo = culture.GetFormat(typeof(NumberFormatInfo));
             s = s.Trim();
             if ((Options.NumberStyles & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
                 s = s.Replace("0x", string.Empty).Replace("&h", string.Empty).Replace("0X", string.Empty).Replace("&H", string.Empty);
 
-            return FromString(s.Trim(), (NumberFormatInfo)formatInfo);
+            return FromString(s.Trim());
         }
 
-        internal abstract object FromString(string value, NumberFormatInfo formatInfo);
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            if (value == null || destinationType != typeof(string) || string.IsNullOrEmpty(Options.FormatString))
+                return base.ConvertTo(context, Options.CultureInfo, value, destinationType);
+
+            return ToString(value, Options.FormatString);
+        }
+
+        internal abstract object FromString(string value);
+
+        internal abstract string ToString(object value, string format);
     }
 }

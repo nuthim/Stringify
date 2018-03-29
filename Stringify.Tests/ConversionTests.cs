@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -85,8 +86,6 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<int?>(null) == null);
         }
 
-
-
         [TestMethod]
         public void ConvertFromPrimitive()
         {
@@ -104,6 +103,14 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<ushort>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<byte>(5) == "5");
             Assert.IsTrue(Converter.ConvertFrom<sbyte>(5) == "5");
+        }
+
+        [TestMethod]
+        public void ConvertFromPrimitiveSpecificFormats()
+        {
+            Assert.IsTrue(Converter.ConvertFrom(1234, new ConverterOptions { FormatString = "C2" }) == "$1,234.00");
+            Assert.IsTrue(Converter.ConvertFrom(1234.56, new ConverterOptions { FormatString = "#,#.00" }) == "1,234.56");
+            Assert.IsTrue(Converter.ConvertFrom(new DateTime(1981, 7, 28), new ConverterOptions { FormatString = "yyyyMMdd" }) == "19810728");
         }
 
         [TestMethod]
@@ -246,6 +253,14 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<Collection<decimal>>("1|    2|  3|4 |   5", new ConverterOptions { Delimiter = '|' }).Count == 5);
             Assert.IsTrue(Converter.ConvertTo<Collection<uint>>("1\t2\t3\t4\t5", new ConverterOptions { Delimiter = '\t' }).Count == 5);
             Assert.IsTrue(Converter.ConvertTo<Collection<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
+        }
+
+        [TestMethod]
+        public void ConvertToDatetime()
+        {
+            Assert.IsTrue(Converter.ConvertTo<DateTime>("28/07/1981") == new DateTime(1981, 7, 28));
+            Assert.IsTrue(Converter.ConvertTo<DateTime>("28071981", new ConverterOptions { FormatString = "ddMMyyyy"} ) == new DateTime(1981, 7, 28));
+            Assert.IsTrue(Converter.ConvertTo<List<DateTime>>("15061983,28071981", new ConverterOptions { FormatString = "ddMMyyyy" }).Count == 2);
         }
 
         [TestMethod]

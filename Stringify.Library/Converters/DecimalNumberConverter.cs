@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
+
 
 namespace Stringify.Converters
 {
     public abstract class DecimalNumberConverter : BaseNumberConverter
     {
-        internal override object FromString(string value, NumberFormatInfo formatInfo)
+        internal override object FromString(string value)
         {
             if ((Options.NumberStyles & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
             {
@@ -18,7 +14,7 @@ namespace Stringify.Converters
                 On a best effort basis check if the number is integral. If yes, allow the conversion.
                 */
                 int number;
-                if (int.TryParse(value, Options.NumberStyles, formatInfo, out number))
+                if (int.TryParse(value, Options.NumberStyles, Options.CultureInfo.NumberFormat, out number))
                     return number;
             }
 

@@ -24,6 +24,7 @@ namespace Stringify.Factory
             RegisterTypeConverter(typeof(ulong), new Converters.UInt64Converter());
             RegisterTypeConverter(typeof(object), new Converters.ObjectConverter());
             RegisterTypeConverter(typeof(bool), new Converters.LogicalBooleanConverter());
+            RegisterTypeConverter(typeof(DateTime), new Converters.DateTimeConverter());
         }
 
         public static void RegisterTypeConverter(Type type, TypeConverter converter)
@@ -41,7 +42,7 @@ namespace Stringify.Factory
 
             TypeConverter converter;
             _converters.TryGetValue(type, out converter);
-            var numberConverter = converter as Converters.BaseNumberConverter;
+            var numberConverter = converter as Converters.ICustomConverter;
             if (numberConverter != null)
                 numberConverter.Options = options;
 

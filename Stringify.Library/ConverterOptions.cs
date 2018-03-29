@@ -10,6 +10,8 @@ namespace Stringify
         private char? _customDelimiter;
         private CultureInfo _cultureInfo;
         private NumberStyles? _styles;
+        private DateTimeStyles? _dtStyles;
+
         static ConverterOptions()
         {
             _defaultOptions = new ConverterOptions
@@ -30,9 +32,11 @@ namespace Stringify
         }
 
         /// <summary>
-        /// Controls if the final output is trimmed off any white space characters. Default is False.
+        /// When converting to string, specifies the format of the output string. If a collection of items is being converted then each
+        /// item will be output in the specified format.
+        /// Also applicable when converting to <see cref="System.DateTime"/> to provision specifying the exact format 
         /// </summary>
-        public bool TrimElements { get; set; }
+        public string FormatString { get; set; }
 
         public CultureInfo CultureInfo
         {
@@ -44,6 +48,12 @@ namespace Stringify
         {
             get { return _styles ?? NumberStyles.Any; }
             set { _styles = value; }
+        }
+
+        public DateTimeStyles DateTimeStyles
+        {
+            get { return _dtStyles ?? DateTimeStyles.None; }
+            set { _dtStyles = value; }
         }
     }
 }
