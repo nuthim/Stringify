@@ -5,10 +5,16 @@ using System.Globalization;
 
 namespace Stringify.Converters
 {
+
+    /// <summary>
+    /// Provides a type converter to convert DateTime objects to and from string representations.
+    /// </summary>
     public class DateTimeConverter : System.ComponentModel.DateTimeConverter, ICustomConverter
     {
+        /// <inheritdoc />
         public ConverterOptions Options { get; set; }
 
+        /// <inheritdoc />
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (!string.IsNullOrEmpty(Options.FormatString))
@@ -22,6 +28,7 @@ namespace Stringify.Converters
             return base.ConvertFrom(context, culture, value);
         }
 
+        /// <inheritdoc />
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (value == null || destinationType != typeof(string) || string.IsNullOrEmpty(Options.FormatString))

@@ -2,6 +2,9 @@
 
 namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a type converter to convert double objects to and from string representations.
+    /// </summary>
     public class DoubleConverter : DecimalNumberConverter
     {
         internal override object FromString(string value)

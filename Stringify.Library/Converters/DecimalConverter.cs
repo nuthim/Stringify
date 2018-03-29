@@ -1,5 +1,9 @@
 ﻿namespace Stringify.Converters
 {
+
+    /// <summary>
+    /// Provides a type converter to convert decimal objects to and from string representations.
+    /// </summary>
     public class DecimalConverter : DecimalNumberConverter
     {
         internal override object FromString(string value)

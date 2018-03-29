@@ -1,5 +1,8 @@
 ﻿namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a type converter to float objects to and from string representations.
+    /// </summary>
     public class SingleConverter : DecimalNumberConverter
     {
         internal override object FromString(string value)

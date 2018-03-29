@@ -2,6 +2,9 @@
 
 namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a type converter to convert 32-bit signed integer objects to and from string representations.
+    /// </summary>
     public class Int32Converter : BaseNumberConverter
     {
         internal override object FromString(string value)

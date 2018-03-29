@@ -7,6 +7,9 @@ using Stringify.Factory;
 
 namespace Stringify
 {
+    /// <summary>
+    /// Utility class to virtually perform any conversions to and from strings
+    /// </summary>
     public class StringConverter
     {
         /// <summary>

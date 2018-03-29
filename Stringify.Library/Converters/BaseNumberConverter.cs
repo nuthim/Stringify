@@ -5,10 +5,15 @@ using System.Globalization;
 
 namespace Stringify.Converters
 {
+    /// <summary>
+    /// Base converter for numeric types
+    /// </summary>
     public abstract class BaseNumberConverter : TypeConverter, ICustomConverter
     {
+        /// <inheritdoc />
         public ConverterOptions Options { get; set; }
 
+        /// <inheritdoc />
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             var s = value as string;
@@ -22,6 +27,7 @@ namespace Stringify.Converters
             return FromString(s.Trim());
         }
 
+        /// <inheritdoc />
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (value == null || destinationType != typeof(string) || string.IsNullOrEmpty(Options.FormatString))

@@ -3,6 +3,9 @@
 
 namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a base type converter to convert decimal / double / float objects to and from string representations.
+    /// </summary>
     public abstract class DecimalNumberConverter : BaseNumberConverter
     {
         internal override object FromString(string value)

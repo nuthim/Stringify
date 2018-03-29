@@ -1,5 +1,8 @@
 ﻿namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a type converter to convert 16-bit signed integer objects to and from string representations.
+    /// </summary>
     public class Int16Converter : BaseNumberConverter
     {
         internal override object FromString(string value)

@@ -3,14 +3,19 @@
 
 namespace Stringify
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ConverterOptions
     {
-        public static readonly ConverterOptions _defaultOptions;
+        #region Fields
+        private static readonly ConverterOptions _defaultOptions;
         private const char DefaultDelimiter = ',';
         private char? _customDelimiter;
         private CultureInfo _cultureInfo;
         private NumberStyles? _styles;
         private DateTimeStyles? _dtStyles;
+        #endregion
 
         static ConverterOptions()
         {
@@ -20,6 +25,9 @@ namespace Stringify
             };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public static ConverterOptions Default => _defaultOptions;
 
         /// <summary>
@@ -38,18 +46,29 @@ namespace Stringify
         /// </summary>
         public string FormatString { get; set; }
 
+        /// <summary>
+        /// Gets or Sets the culture to apply for conversion
+        /// </summary>
         public CultureInfo CultureInfo
         {
             get { return _cultureInfo ?? CultureInfo.CurrentCulture; }
             set { _cultureInfo = value; }
         }
 
+        /// <summary>
+        /// Used when converting to numbers from a given formatted string to permit pre-definied characters. 
+        /// Refer MSDN for further information  
+        /// </summary>
         public NumberStyles NumberStyles
         {
             get { return _styles ?? NumberStyles.Any; }
             set { _styles = value; }
         }
 
+        /// <summary>
+        /// Used when converting to <see cref="System.DateTime"/> from a given formatted string to permit pre-definied characters. 
+        /// Refer MSDN for further information  
+        /// </summary>
         public DateTimeStyles DateTimeStyles
         {
             get { return _dtStyles ?? DateTimeStyles.None; }

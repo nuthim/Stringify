@@ -1,5 +1,8 @@
 ﻿namespace Stringify.Converters
 {
+    /// <summary>
+    /// Provides a type converter to convert 8-bit signed integer objects to and from string representations.
+    /// </summary>
     public class SByteConverter : BaseNumberConverter
     {
         internal override object FromString(string value)
