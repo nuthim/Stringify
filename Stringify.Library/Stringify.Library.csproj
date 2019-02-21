@@ -3,6 +3,17 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <RootNamespace>Stringify</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>2.0.1</Version>
+    <Authors>Mithun Basak</Authors>
+    <PackageLicenseUrl>https://github.com/nuthim/Stringify/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/nuthim/Stringify</PackageProjectUrl>
+    <Description>Stringify is a type safe string transformation utility. It is very common to have the ability to convert string data back and forth to primitive types. Stringify lets to do this and more by extending the idea to any type and providing a overly simple api hiding all complexities.</Description>
+    <PackageTags>Stringify, Stringify.Library, Conversion, Transformation, Mithun</PackageTags>
+    <PackageReleaseNotes>Migrated to .Net Standard 1.3</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/nuthim/Stringify</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
