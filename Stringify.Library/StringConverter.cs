@@ -33,7 +33,7 @@ namespace Stringify
         public T ConvertTo<T>(string value, ConverterOptions options)
         {
             var type = typeof(T);
-            if (value == null && type.IsClass)
+            if (value == null && type.GetTypeInfo().IsClass)
                 return default(T);
 
             if (options == null)
@@ -43,7 +43,7 @@ namespace Stringify
                 return Convert<T>(value, options);
 
             var enumerable = InvokeGetArray(type, value, options);
-            if (type.IsArray || type.IsInterface)
+            if (type.IsArray || type.GetTypeInfo().IsInterface)
                 return (T)enumerable;
 
             return (T)Activator.CreateInstance(type, enumerable);
@@ -117,7 +117,7 @@ namespace Stringify
 
         private object InvokeGetArray(Type enumerableType, string value, ConverterOptions options)
         {
-            var elementType = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() ?? typeof(object) };
+            var elementType = enumerableType.GetTypeInfo().IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() ?? typeof(object) };
             var method = typeof(StringConverter).GetMethod("GetArray", BindingFlags.NonPublic | BindingFlags.Instance);
             var generic = method.MakeGenericMethod(elementType);
             return generic.Invoke(this, new object[] { value, options });
@@ -131,7 +131,7 @@ namespace Stringify
 
         private object InvokeAsString(Type enumerableType, object value, ConverterOptions options)
         {
-            var genericArguments = enumerableType.IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() };
+            var genericArguments = enumerableType.GetTypeInfo().IsGenericType ? enumerableType.GetGenericArguments() : new[] { enumerableType.GetElementType() };
             var methodInfo = typeof(StringConverter).GetMethod("AsString", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericArguments);
             return methodInfo.Invoke(this, new [] { value, options });
         }

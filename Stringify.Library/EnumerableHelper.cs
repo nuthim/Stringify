@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 
 namespace Stringify
 {
@@ -7,7 +8,7 @@ namespace Stringify
     {
         public static bool IsEnumerableType(Type type)
         {
-            return type != null && type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type);
+            return type != null && type != typeof(string) && typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
         }
 
     }

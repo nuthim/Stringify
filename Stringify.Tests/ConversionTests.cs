@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using NUnit.Framework;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Stringify.Factory;
 using Stringify.Tests.Converters;
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -12,22 +12,21 @@ using Stringify.Tests.Converters;
 
 namespace Stringify.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ConversionTests
     {
         private static StringConverter Converter
         {
-            get; set;
+            get; 
         }
 
-        [ClassInitialize]
-        public static void Initialize(TestContext context)
+        static ConversionTests()
         {
             Converter = new StringConverter();
             TypeConverterFactory.RegisterTypeConverter(typeof(bool), new CustomBooleanConverter());
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToPrimitive()
         {
             Assert.IsTrue(Converter.ConvertTo<int>("1000") == 1000);
@@ -46,7 +45,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<sbyte>("5") == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToPrimitiveWithStyles()
         {
             Assert.IsTrue(Converter.ConvertTo<int>("1,000") == 1000); //Group separator
@@ -62,13 +61,13 @@ namespace Stringify.Tests
 
             Assert.IsTrue(Converter.ConvertTo<decimal>("1,000") == 1000m); //Group separator
             Assert.IsTrue(Converter.ConvertTo<decimal>("-1,000") == -1000m); //Sign
-            Assert.IsTrue(Converter.ConvertTo<decimal>("(1,000)") == -1000m); //Parantheses indicates negative
+            Assert.IsTrue(Converter.ConvertTo<decimal>("(1,000)") == -1000m); //Parentheses indicates negative
             Assert.IsTrue(Converter.ConvertTo<decimal>("$1,000") == 1000m); //Currency
             Assert.IsTrue(Converter.ConvertTo<decimal>("    1,000   ") == 1000m); //White spaces
             Assert.IsTrue(Converter.ConvertTo<decimal>("    1,005E-2   ") == 10.05m); //Exponent
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToPrimitiveUnsupportedStyles()
         {
             Assert.IsTrue(Converter.ConvertTo<decimal>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber }) == 202m); //Hex not supported on decimal
@@ -76,7 +75,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<double>("  0xCA   ", new ConverterOptions { NumberStyles = NumberStyles.HexNumber }) == 202d); //Hex not supported on double
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertNullable()
         {
             Assert.IsTrue(Converter.ConvertTo<int?>("5") == 5);
@@ -86,7 +85,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<int?>(null) == null);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromPrimitive()
         {
             Assert.IsTrue(Converter.ConvertFrom(5) == "5"); //int to string
@@ -105,7 +104,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<sbyte>(5) == "5");
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromPrimitiveSpecificFormats()
         {
             Assert.IsTrue(Converter.ConvertFrom(1234, new ConverterOptions { FormatString = "C2" }) == "$1,234.00");
@@ -113,7 +112,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom(new DateTime(1981, 7, 28), new ConverterOptions { FormatString = "yyyyMMdd" }) == "19810728");
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertObjects()
         {
             Assert.IsTrue(Converter.ConvertTo<object>("5") == "5");
@@ -123,7 +122,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<object>(null) == null);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToBoolean()
         {
             Assert.IsTrue(Converter.ConvertTo<bool>("true"));
@@ -140,14 +139,14 @@ namespace Stringify.Tests
             Assert.IsFalse(Converter.ConvertTo<bool>("FauX"));
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromBoolean()
         {
             Assert.IsTrue(Converter.ConvertFrom(true) == bool.TrueString);
             Assert.IsTrue(Converter.ConvertFrom(false) == bool.FalseString);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToIEnumerableBoolean()
         {
             //Alternating true and false values
@@ -162,7 +161,7 @@ namespace Stringify.Tests
             Assert.IsFalse(falseArray.Any(x => x));
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToArray()
         {
             Assert.IsTrue(Converter.ConvertTo<string[]>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';'}).Length == 5);
@@ -173,7 +172,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<short[]>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Length == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromArray()
         {
             Assert.IsTrue(Converter.ConvertFrom(new[] {"1", null, string.Empty, "!@#$%^&*()", "happy mother's day!" }) == "1,,,!@#$%^&*(),happy mother's day!");
@@ -182,7 +181,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom(new ushort[] { 1, 2, 3, 4, 5 }, new ConverterOptions { Delimiter = '\t' }) == "1\t2\t3\t4\t5");
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToEnumerable()
         {
             Assert.IsTrue(Converter.ConvertTo<IEnumerable<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count() == 5);
@@ -193,7 +192,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<IEnumerable<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count() == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromEnumerable()
         {
             Assert.IsTrue(Converter.ConvertFrom<IEnumerable<string>>(new[] { "1", "2", "3", "4", "5" }) == "1,2,3,4,5");
@@ -202,7 +201,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertFrom<IEnumerable<ushort>>(new ushort[] { 1, 2, 3, 4, 5 }) == "1,2,3,4,5");
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToIList()
         {
             Assert.IsTrue(Converter.ConvertTo<IList<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
@@ -216,7 +215,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<IList>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToList()
         {
             Assert.IsTrue(Converter.ConvertTo<List<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
@@ -230,7 +229,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<ArrayList>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToICollection()
         {
             Assert.IsTrue(Converter.ConvertTo<ICollection<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
@@ -244,7 +243,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<ICollection>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToCollection()
         {
             Assert.IsTrue(Converter.ConvertTo<Collection<string>>("1; 2; 3; 4; 5", new ConverterOptions { Delimiter = ';' }).Count == 5);
@@ -255,7 +254,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<Collection<short>>("1_2_3_4_5", new ConverterOptions { Delimiter = '_' }).Count == 5);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertToDatetime()
         {
             Assert.IsTrue(Converter.ConvertTo<DateTime>("28/07/1981") == new DateTime(1981, 7, 28));
@@ -263,7 +262,7 @@ namespace Stringify.Tests
             Assert.IsTrue(Converter.ConvertTo<List<DateTime>>("15061983,28071981", new ConverterOptions { FormatString = "ddMMyyyy" }).Count == 2);
         }
 
-        [TestMethod]
+        [Test]
         public void ConvertFromComplexType()
         {
             var employee = new Employee { Id = 1, Name = "Mithun" };
